@@ -285,6 +285,25 @@ else ifeq ($(platform), ctr)
    ARM = 1
    STATIC_LINKING := 1
 
+# PSP
+else ifeq ($(platform), psp1)
+   TARGET := $(TARGET_NAME)_libretro_$(platform).a
+   CC = psp-gcc$(EXE_EXT)
+   AR = psp-ar$(EXE_EXT)
+   CFLAGS += -DPSP -G0
+   CFLAGS += -I$(shell psp-config --pspsdk-path)/include
+   CFLAGS += -fsingle-precision-constant
+   CFLAGS += -Wall
+   CFLAGS += -fomit-frame-pointer -ffast-math
+   CFLAGS += -fno-exceptions -fno-unwind-tables -fno-asynchronous-unwind-tables 
+   CFLAGS += -ftree-vectorize -funroll-loops -fno-optimize-sibling-calls
+   HAVE_RZLIB := 1
+   DISABLE_ERROR_LOGGING := 1
+   ARM = 0
+   STATIC_LINKING := 1
+   USE_CYCLONE = 0
+   USE_DRZ80 = 0
+
 # Vita
 else ifeq ($(platform), vita)
    TARGET := $(TARGET_NAME)_libretro_$(platform).a
