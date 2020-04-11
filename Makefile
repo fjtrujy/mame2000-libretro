@@ -529,7 +529,7 @@ endif
 ifeq ($(DEBUG), 1)
 CFLAGS += -O0 -g
 else
-CFLAGS += -O2 -DNDEBUG
+CFLAGS += -O3 -DNDEBUG
 endif
 
 # compiler, linker and utilities
