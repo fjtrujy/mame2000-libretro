@@ -285,6 +285,25 @@ else ifeq ($(platform), ctr)
    ARM = 1
    STATIC_LINKING := 1
 
+# PS2
+else ifeq ($(platform), ps2)
+   TARGET := $(TARGET_NAME)_libretro_$(platform).a
+   CC = mips64r5900el-ps2-elf-gcc$(EXE_EXT)
+   AR = mips64r5900el-ps2-elf-ar$(EXE_EXT)
+   CFLAGS += -D_EE -DPS2 -G0
+   CFLAGS += -I$(PS2SDK)/ee/include -I$(PS2SDK)/common/include
+   CFLAGS += -fsingle-precision-constant
+   CFLAGS += -Wall
+   CFLAGS += -fomit-frame-pointer -ffast-math
+   CFLAGS += -fno-exceptions -fno-unwind-tables -fno-asynchronous-unwind-tables 
+   CFLAGS += -ftree-vectorize -funroll-loops -fno-optimize-sibling-calls
+   HAVE_RZLIB := 1
+   DISABLE_ERROR_LOGGING := 1
+   ARM = 0
+   STATIC_LINKING := 1
+   USE_CYCLONE = 0
+   USE_DRZ80 = 0
+
 # PSP
 else ifeq ($(platform), psp1)
    TARGET := $(TARGET_NAME)_libretro_$(platform).a
