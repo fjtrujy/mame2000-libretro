@@ -4,8 +4,6 @@
 #include <stdlib.h>
 #include <kernel.h>
 
-#define PS2_INFO printf("%s:%d       %s\n",__FILE__, __LINE__, __func__)
-
 /* Since cothread_t is a void pointer it must contain an address. We can't return a reference to a local variable
  * because it would go out of scope, so we create a static variable instead so we can return a reference to it.
  */
@@ -14,9 +12,7 @@ extern void *_gp;
 
 cothread_t co_active()
 {
-  PS2_INFO;
   active_thread_id = GetThreadId();
-  PS2_INFO;
   return &active_thread_id;
 }
 
@@ -43,7 +39,7 @@ cothread_t co_create(unsigned int size, void (*entrypoint)(void))
 	thread.func				= (void *)entrypoint;
 	thread.stack			= threadStack;
 	thread.option			= 0;
-  thread.initial_priority = 0x70;
+  thread.initial_priority = 1;
 
   s32 new_thread_id = CreateThread(&thread);
 	if (new_thread_id < 0)
