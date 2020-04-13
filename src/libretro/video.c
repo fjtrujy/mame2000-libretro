@@ -96,6 +96,8 @@ int video_aspect=0;
 const int safety = 16;
 
 
+UINT32 *ps2_palette;
+UINT8 *ps2_buffer;
 struct osd_bitmap *osd_alloc_bitmap(int width,int height,int depth)
 {
 	struct osd_bitmap *bitmap;
@@ -560,6 +562,8 @@ int osd_allocate_colors(unsigned int totalcolors,const unsigned char *palette,un
 		screen_colors += 2;
 	else screen_colors = 256;
 
+	ps2_palette = (unsigned int*)malloc(screen_colors * sizeof(int));
+
 	dirtycolor = (unsigned int*)malloc(screen_colors * sizeof(int));
 	current_palette = (unsigned char*)malloc(3 * screen_colors * sizeof(unsigned char));
 	palette_16bit_lookup = (UINT32*)malloc(screen_colors * sizeof(palette_16bit_lookup[0]));
@@ -838,6 +842,17 @@ void osd_update_video_and_audio(struct osd_bitmap *bitmap)
 						b = bright_lookup[b];
 					}
 					gp2x_video_color8(i,r,g,b);
+
+					int index_to_write = i;
+					int modi = i & 63;
+   					if ((modi >= 8 && modi < 16) || (modi >= 40 && modi < 48)) {
+      					index_to_write += 8;
+   					} else if ((modi >= 16 && modi < 24) || (modi >= 48 && modi < 56)) {
+         				index_to_write -= 8;
+   					}
+
+					int color = (b << 16) | (g << 8) | (r << 0);
+					ps2_palette[index_to_write] = color;
 				}
 			}
 			gp2x_video_setpalette();
@@ -883,7 +898,8 @@ void osd_update_video_and_audio(struct osd_bitmap *bitmap)
 	}
 
 		/* copy the bitmap to screen memory */
-		update_screen(bitmap);
+		// update_screen(bitmap);
+		ps2_buffer = bitmap->line[0];
 
 		if (have_to_clear_bitmap)
 			osd_clearbitmap(bitmap);

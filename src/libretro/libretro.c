@@ -58,12 +58,21 @@ extern int gfx_xoffset;
 extern int gfx_yoffset;
 extern int gfx_width;
 extern int gfx_height;
+extern int gfx_display_lines;
+extern int gfx_display_columns;
 extern int usestereo;
 extern int samples_per_frame;
 extern short *samples_buffer;
 extern short *conversion_buffer;
 extern int joy_pressed[40];
 extern int key[KEY_MAX];
+
+#if defined(PS2)
+#include "libretro-common/include/libretro_gskit_ps2.h"
+extern UINT32 *ps2_palette;
+extern UINT8 *ps2_buffer;
+RETRO_HW_RENDER_INTEFACE_GSKIT_PS2 *ps2 = NULL;
+#endif
 
 extern char *nvdir, *hidir, *cfgdir, *inpdir, *stadir, *memcarddir;
 extern char *artworkdir, *screenshotdir, *alternate_name;
@@ -544,7 +553,53 @@ void retro_run(void)
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
       update_variables();
 
+#if defined(PS2)
+   uint32_t *buf = (uint32_t *)RETRO_HW_FRAME_BUFFER_VALID;
+
+   if (!ps2) {
+      if (!environ_cb(RETRO_ENVIRONMENT_GET_HW_RENDER_INTERFACE, (void **)&ps2) || !ps2) {
+         printf("Failed to get HW rendering interface!\n");
+         return;
+      }
+
+      if (ps2->interface_version != RETRO_HW_RENDER_INTERFACE_GSKIT_PS2_VERSION) {
+         printf("HW render interface mismatch, expected %u, got %u!\n",
+                  RETRO_HW_RENDER_INTERFACE_GSKIT_PS2_VERSION, ps2->interface_version);
+         return;
+      }
+   }
+
+   ps2->coreTexture->Width = gfx_width + 32;
+   ps2->coreTexture->Height = gfx_height + 32;
+   ps2->coreTexture->PSM = GS_PSM_T8;
+   ps2->coreTexture->ClutPSM = GS_PSM_CT32;
+   ps2->coreTexture->Filter = GS_FILTER_LINEAR;
+   ps2->padding = empty_ps2_insets;
+
+   int horizontal = (ps2->coreTexture->Width - gfx_display_columns) >> 1;
+   int vertical = (ps2->coreTexture->Height - gfx_display_lines) >> 1;
+   // printf("horizontal padding %i\n", horizontal);
+   // printf("vertical padding %i\n", vertical);
+
+   ps2->padding = (struct retro_hw_ps2_insets){ vertical,
+                                                horizontal -16 ,
+                                                vertical,
+                                                horizontal + 16};
+
+   ps2->coreTexture->Clut = (u32*)ps2_palette;
+   ps2->coreTexture->Mem = (u32*)ps2_buffer;
+
+   // printf("gfx_width %i\n", gfx_width);
+   // printf("gfx_height %i\n", gfx_height);
+   // printf("gfx_xoffset %i\n", gfx_xoffset);
+   // printf("gfx_yoffset %i\n", gfx_yoffset);
+   // printf("gfx_display_lines %i\n", gfx_display_lines);
+   // printf("gfx_display_columns %i\n", gfx_display_columns);
+
+   video_cb(buf, gfx_width, gfx_height, gfx_width * 2);
+#else
    video_cb(gp2x_screen15, gfx_width, gfx_height, gfx_width * 2);
+#endif
    if (samples_per_frame)
    {
       if (usestereo)
