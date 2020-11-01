@@ -569,15 +569,15 @@ void retro_run(void)
       }
    }
 
-   ps2->coreTexture->Width = gfx_width + 32;
-   ps2->coreTexture->Height = gfx_height + 32;
+   ps2->coreTexture->Width = 512 + 32;//gfx_width + 32;
+   ps2->coreTexture->Height = 256 + 32;//gfx_height + 32;
    ps2->coreTexture->PSM = GS_PSM_T8;
    ps2->coreTexture->ClutPSM = GS_PSM_CT32;
    ps2->coreTexture->Filter = GS_FILTER_LINEAR;
    ps2->padding = empty_ps2_insets;
 
    int horizontal = (ps2->coreTexture->Width - gfx_display_columns) >> 1;
-   int vertical = (ps2->coreTexture->Height - gfx_display_lines) >> 1;
+   int vertical = 0;//(ps2->coreTexture->Height - gfx_display_lines) >> 1;
    // printf("horizontal padding %i\n", horizontal);
    // printf("vertical padding %i\n", vertical);
 

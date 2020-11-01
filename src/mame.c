@@ -525,7 +525,7 @@ extern unsigned retro_hook_quit;
 int updatescreen(void)
 {
 	/* update sound */
-	sound_update();
+	// sound_update();
 
 	if (osd_skip_this_frame() == 0)
 	{

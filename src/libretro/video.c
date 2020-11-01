@@ -98,8 +98,11 @@ const int safety = 16;
 
 UINT32 *ps2_palette;
 UINT8 *ps2_buffer;
+// struct retro_hw_ps2_insets padding;
+
 struct osd_bitmap *osd_alloc_bitmap(int width,int height,int depth)
 {
+	printf("osd_alloc_bitmap(%i,%i)\n", width, height);
 	struct osd_bitmap *bitmap;
 
 
@@ -130,7 +133,8 @@ struct osd_bitmap *osd_alloc_bitmap(int width,int height,int depth)
 		/* clear ALL bitmap, including safety area, to avoid garbage on right */
 		/* side of screen is width is not a multiple of 4 */
 		memset(bm,0,(height + 2 * safety) * rowlen);
-
+		printf("*********** width %i\n", (rdwidth + 2 * safety));
+		printf("*********** height %i\n", (height + 2 * safety));
 		if ((bitmap->line = (unsigned char**)malloc((height + 2 * safety) * sizeof(unsigned char *))) == 0)
 		{
 			free(bm);
@@ -598,6 +602,7 @@ int osd_allocate_colors(unsigned int totalcolors,const unsigned char *palette,un
 	{
 		if (video_depth == 8 && totalcolors >= 255)
 		{
+			printf("FJTRUJY: More than 256\n");
 			int bestblack,bestwhite;
 			int bestblackscore,bestwhitescore;
 
@@ -812,6 +817,7 @@ void osd_update_video_and_audio(struct osd_bitmap *bitmap)
 
 	if (bitmap->depth == 8)
 	{
+		// printf("8 Bits\n");
 		if (dirty_bright)
 		{
 			dirty_bright = 0;
@@ -860,6 +866,7 @@ void osd_update_video_and_audio(struct osd_bitmap *bitmap)
 	}
 	else
 	{
+		// printf("16 Bits\n");
 		if (dirty_bright)
 		{
 			dirty_bright = 0;
